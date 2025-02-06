@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fixed Deposit FAQs</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        padding: 0;
+      }
+      h2 {
+        color: #333;
+      }
+      .faq-item {
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+      }
+      .faq-answer {
+        display: none;
+        margin-top: 10px;
+      }
+      .faq-item.active .faq-answer {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <label for="language-select">Select Language:</label>
+    <select id="language-select">
+      <option value="en">English</option>
+      <option value="hi">Hindi</option>
+      <option value="bn">Bengali</option>
+    </select>
+
+    <h2>Fixed Deposit FAQs</h2>
+    <div id="faq-container">
+      <p>Loading FAQs...</p>
+    </div>
+
+    <script>
+      function attachClickEvents() {
+        document.querySelectorAll(".faq-question").forEach((question) => {
+          question.addEventListener("click", () => {
+            question.parentElement.classList.toggle("active");
+          });
+        });
+      }
+
+      function fetchFAQs() {
+        const lang = document.getElementById("language-select").value;
+        const apiUrl = `/api/faqs/?lang=${lang}`;
+
+        fetch(apiUrl)
+          .then((response) => {
+            console.log("API Response Status:", response.status);
+            if (!response.ok) {
+              throw new Error(`API error: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Translated FAQs:", data);
+            const faqContainer = document.getElementById("faq-container");
+            faqContainer.innerHTML = "";
+
+            if (data.length === 0) {
+              faqContainer.innerHTML =
+                "<p>No FAQs available at the moment.</p>";
+              return;
+            }
+
+            data.forEach((faq) => {
+              const faqItem = document.createElement("div");
+              faqItem.className = "faq-item";
+              faqItem.innerHTML = `
+                <h4 class="faq-question">${faq.question}</h4>
+                <div class="faq-answer"><p>${faq.answer}</p></div>
+              `;
+              faqContainer.appendChild(faqItem);
+            });
+
+            attachClickEvents();
+          })
+          .catch((error) => {
+            console.error("Error fetching FAQs:", error);
+            document.getElementById("faq-container").innerHTML =
+              "<p>Failed to load FAQs.</p>";
+          });
+      }
+
+      document.addEventListener("DOMContentLoaded", fetchFAQs);
+      document
+        .getElementById("language-select")
+        .addEventListener("change", fetchFAQs);
+    </script>
+  </body>
+</html>
